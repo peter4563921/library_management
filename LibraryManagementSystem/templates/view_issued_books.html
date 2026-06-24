@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issued Books</title>
+</head>
+<body>
+
+    <h1>Issued Books Details</h1>
+
+    <table border="1" cellpadding="10">
+
+        <tr>
+            <th>Issue ID</th>
+            <th>Student Name</th>
+            <th>Book Name</th>
+            <th>Author Name</th>
+            <th>Quantity</th>
+            <th>Issue Date</th>
+        </tr>
+
+        {% for book in books %}
+        <tr>
+            <td>{{ book[0] }}</td>
+            <td>{{ book[1] }}</td>
+            <td>{{ book[2] }}</td>
+            <td>{{ book[3] }}</td>
+            <td>{{ book[4] }}</td>
+            <td>{{ book[5] }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <br><br>
+
+    <a href="/">Back to Home</a>
+
+    <br><br>
+
+    <a href="/issuebook">Issue Another Book</a>
+
+    <br><br>
+
+    <a href="/viewbooks">View All Books</a>
+
+</body>
+</html>
