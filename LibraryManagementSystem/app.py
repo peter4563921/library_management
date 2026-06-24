@@ -1,16 +1,33 @@
 from flask import Flask, render_template, request, redirect
-import mysql.connector
+import sqlite3
 
 app = Flask(__name__)
 
-conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="library_db"
-)
-
+# Database Connection
+conn = sqlite3.connect("library.db", check_same_thread=False)
 cursor = conn.cursor()
+
+# Create Tables
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS books (
+    book_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    author TEXT,
+    quantity INTEGER
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS issued_books (
+    issue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_name TEXT,
+    book_name TEXT,
+    author_name TEXT,
+    quantity INTEGER
+)
+""")
+
+conn.commit()
 
 # Home Page
 @app.route('/')
@@ -28,14 +45,11 @@ def add_book():
         author = request.form['author']
         quantity = request.form['quantity']
 
-        sql = """
-        INSERT INTO books (title, author, quantity)
-        VALUES (%s, %s, %s)
-        """
+        cursor.execute(
+            "INSERT INTO books (title, author, quantity) VALUES (?, ?, ?)",
+            (title, author, quantity)
+        )
 
-        values = (title, author, quantity)
-
-        cursor.execute(sql, values)
         conn.commit()
 
         return redirect('/viewbooks')
@@ -64,20 +78,20 @@ def issue_book():
         author_name = request.form['author_name']
         quantity = request.form['quantity']
 
-        sql = """
-        INSERT INTO issued_books
-        (student_name, book_name, author_name, quantity)
-        VALUES (%s, %s, %s, %s)
-        """
-
-        values = (
-            student_name,
-            book_name,
-            author_name,
-            quantity
+        cursor.execute(
+            """
+            INSERT INTO issued_books
+            (student_name, book_name, author_name, quantity)
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                student_name,
+                book_name,
+                author_name,
+                quantity
+            )
         )
 
-        cursor.execute(sql, values)
         conn.commit()
 
         return redirect('/viewissuedbooks')
@@ -87,6 +101,7 @@ def issue_book():
 
 # View Issued Books
 @app.route('/viewissuedbooks')
+
 def view_issued_books():
 
     cursor.execute("SELECT * FROM issued_books")
